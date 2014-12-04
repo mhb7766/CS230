@@ -28,7 +28,7 @@ void main(void)
   P1DIR |= 0xFF;
   P1OUT &= ~0b11110000;             // Set P1.4-P1.7 to ground
 
-  //setup timer interrupt
+  //setup timer interrupt .
   TA1CCR0  = 1000; //500;
   BCSCTL3 = LFXT1S_2; // LFXT1S_2 sets bits 
                   // in Clock System to 
