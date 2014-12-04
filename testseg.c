@@ -67,7 +67,6 @@ void count(){
     }
     show(0,0,0,i);
   } 
-  
 }
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
