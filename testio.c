@@ -13,6 +13,9 @@ int main()
     TA1CTL = TASSEL_1 | MC_1 | ID_1;
     serial_init(9600);
     TA1CCTL0 = CCIE;  
+
+    
+    
     __enable_interrupt();
     while(1)__delay_cycles(10);
 }
