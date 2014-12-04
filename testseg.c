@@ -72,7 +72,7 @@ void count(){
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
   int i;
-  for (i=0;i<100;i++){
+  for (i=0;i<10;i++){
     P1OUT = 0b01110000;
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
