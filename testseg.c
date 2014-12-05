@@ -10,7 +10,7 @@
 #define SEVEN   0b00000111;
 #define EIGHT   0b01111111;
 #define NINE    0b01100111;
-
+int i, j, k, l;
 int display[10] = {0};
 
 void setup(void);
@@ -37,10 +37,8 @@ void main(void)
   serial_init(9600);
   TA1CCTL0 = CCIE;  
 
-    
-    
-    __enable_interrupt();
-    while(1)__delay_cycles(10);
+  __enable_interrupt();
+  //while(1)__delay_cycles(10);
   setup();
   for (;;){
     count();
@@ -64,27 +62,20 @@ void setup(){
 // uses for loops to run the timer
 // calls show function to update the display
 void count(){
-  int i, j, k, l;
 
   for (i=0; i<10; i++){
     for (j=0; j<10; j++){
       for (k=0; k<10; k++){
         for (l=0; l<10; l++){
-          if(l==5){
-            show(l,k,j,i);
-          }
         }
-        show(0, k, j, i);
       }
-      show(0,0,j,i);
     }
-    show(0,0,0,i);
   } 
 }
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
   int i;
-  for (i=0;i<10;i++){
+  for (i=0;i<1000;i++){
     P1OUT = 0b01110000;
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
@@ -102,6 +93,6 @@ void show(int a, int b, int c, int d){
 
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
-{        v=v+1;
-        cio_printf("%u\n\r",v);
+{       show(i,j,k,l);
+        cio_printf("%d | %d | %d | %d\n\r",i,j,k,l);
 }

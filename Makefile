@@ -1,4 +1,4 @@
-FILENAME = testio
+FILENAME = testseg
 LIBEMB   = y
 
 ${FILENAME}.elf: ${FILENAME}.c
