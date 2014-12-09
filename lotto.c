@@ -10,9 +10,13 @@
  ******/
 int shell_cmd_help(shell_cmd_args *args);
 int shell_cmd_argt(shell_cmd_args *args);
+int shell_cmd_play(shell_cmd_args *args);
 void setup(void);
+void digitCtrl(void);
 void count(void);
 void show(int, int, int, int);
+void enableTA1(void);
+void enableButInt(void);
 /******
  *
  *    CONSTANTS
@@ -36,7 +40,7 @@ void show(int, int, int, int);
  *
  ******/
 int display[10] = {0};
-
+int w, x, y, z;
 
 
 /******
@@ -45,7 +49,7 @@ int display[10] = {0};
  *
  ******/
 shell_cmds my_shell_cmds = {
-  .count = 2,
+  .count = 3,
   .cmds  = {
     {
       .cmd  = "help",
@@ -56,6 +60,11 @@ shell_cmds my_shell_cmds = {
       .cmd  = "args",
       .desc = "print back given arguments",
       .func = shell_cmd_argt
+    },
+    {
+      .cmd  = "play",
+      .desc = "enter your four digit guess to play",
+      .func =  shell_cmd_play
     }
   }
 };
@@ -89,12 +98,22 @@ int shell_cmd_argt(shell_cmd_args *args)
   return 0;
 }
 
+int shell_cmd_play(shell_cmd_args *args)
+{
+  enableTA1();
+  enableButInt();
+  for(;;){
+    count();
+  }
+  return 0;
+}
+
 int shell_process(char *cmd_line)
 {
   return shell_process_cmds(&my_shell_cmds, cmd_line);
 }
 
-void digitCtrl(){
+void digitCtrl(void){
 
 }
 
@@ -116,11 +135,7 @@ int main(void)
   P1DIR |= 0xFF;                    // Set P1 to output
   P1OUT &= ~0b11110000;             // Set P1.4-P1.7 to ground
 
-  setup();
-  for(;;){
-    count();
-  }
-
+  setup();                          // initialize display array
   serial_init(9600);                        // Initialize Serial Coms
   __enable_interrupt();                     // Enable Global Interrupts
 
@@ -185,31 +200,47 @@ void setup(){
   display[9] = NINE;
 }
 
+void enableButInt(){
+  P1DIR = BIT0;
+  P1REN = BIT3;                     // enable pullup resistor for switch
+  P1OUT  |= BIT3;                   // setting switch's initial state to 1
+  P1IE   |= BIT3;                   // enable interrupt for p1.3
+  P1IES  |= BIT3;                   // select high-to low fire
+  P1IFG  &= ~BIT3;                  // clear the interrupt flag
+}
+
+void enableTA1(){
+  TA1CCR0  = 1000; //500;
+  BCSCTL3 = LFXT1S_2; // LFXT1S_2 sets bits 
+                  // in Clock System to 
+                  // 'source'VLO for TASSEL_1
+  TA1CTL = TASSEL_1 | MC_1 | ID_1;
+  TA1CCTL0 = CCIE; 
+}
+
 // uses for loops to run the timer
 // calls show function to update the display
 void count(){
-  int i, j, k, l;
 
-  for (i=0; i<10; i++){
-    for (j=0; j<10; j++){
-      for (k=0; k<10; k++){
-        for (l=0; l<10; l++){
-          if(l==5){
-            show(l,k,j,i);
-          }
+  for (w=0; w<10; w++){
+    __delay_cycles(1600);
+    for (x=0; x<10; x++){
+      __delay_cycles(1600);
+      for (y=0; y<10; y++){
+        __delay_cycles(1600);
+        for (z=0; z<10; z++){
+          __delay_cycles(1600);
+          //show(z,y,x,w);
         }
-        show(0, k, j, i);
       }
-      show(0,0,j,i);
     }
-    show(0,0,0,i);
   } 
-  
 }
+
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
   int i;
-  for (i=0;i<10;i++){
+  for (i=0;i<1000;i++){
     P1OUT = 0b01110000;
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
@@ -231,17 +262,21 @@ void show(int a, int b, int c, int d){
  ******/
 #pragma vector=TIMER0_A0_VECTOR             // TA0 CCR0 Interrupt
   __interrupt void Timer0_A0 (void) {
-    cio_print("timer fired");               // debugging
-  // First Timer Interrupt
+    cio_print("timer 0 fired\n\r");
+    show(z,y,x,w);                          // shows count value on screen when timer fires
 }
 
+//timer interrupt to display digits when timer resets
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
-  __interrupt void Timer0_A1 (void) {
-  // Second Timer Interrupt
+__interrupt void Timer1_A0 (void) 
+{       
+        //cio_print("timer 1 fired");
+       show(z,y,x,w);
 }
 
 #pragma vector=PORT1_VECTOR
 __interrupt void Port1_Interrupt (void) {
-  // Butter Interrupt
-  P1IFG &= ~BIT3;                           // Don't Forget to Clear Flag!
+  // Button Interrupt
+  cio_print("button interrupt fired");
+  P1IFG &= ~BIT3;                      // Don't Forget to Clear Flag!
 }

@@ -10,6 +10,7 @@
 #define SEVEN   0b00000111;
 #define EIGHT   0b01111111;
 #define NINE    0b01100111;
+
 int i, j, k, l;
 int display[10] = {0};
 
@@ -75,7 +76,7 @@ void count(){
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
   int i;
-  for (i=0;i<1000;i++){
+  for (i=0;i<100;i++){
     P1OUT = 0b01110000;
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
@@ -91,8 +92,10 @@ void show(int a, int b, int c, int d){
   }
 }
 
+//timer interrupt to display digits when timer resets
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
-{       show(i,j,k,l);
-        cio_printf("%d | %d | %d | %d\n\r",i,j,k,l);
+{       show(l,k,j,i);
+        //cio_printf("%d | %d | %d | %d\n\r",i,j,k,l);
 }
+
