@@ -16,6 +16,7 @@ void count(void);
 void show(int, int, int, int);
 void enableTA1(void);
 void enableButInt(void);
+void freeze(int, int, int, int);
 /******
  *
  *    CONSTANTS
@@ -39,9 +40,10 @@ void enableButInt(void);
  *
  ******/
 int display[10] = {0};
-int clock0_flag = 0; // flags for
-int clock1_flag = 0; // main to handle 
-int button_flag = 0; // interrupts
+int clock0_flag = 0; //** flags for
+int clock1_flag = 0; //** main to handle 
+int button_flag = 0; //*** interrupts
+
 int w, x, y, z;      // counts digits
 int guess[4]  = {0}; // stores user's guess
 int result[4] = {0}; // store result of spin
@@ -202,10 +204,10 @@ void setup(){
 }
 
 void enableButInt(){
-  P1DIR = BIT0;
-  P1REN = BIT3;
-  P1OUT |= BIT3;
-  P1IE |= BIT3;
+  P1DIR  = BIT0;
+  P1REN  = BIT3;
+  P1OUT |= BIT3; //set initial state to high - 1
+  P1IE  |= BIT3;
   P1IES |= BIT3;
   P1IFG &= ~BIT3;
 }
@@ -224,17 +226,16 @@ void enableTA1(){
 void count(){
 
   for (w=0; w<10; w++){
-    __delay_cycles(1600);
     for (x=0; x<10; x++){
-      __delay_cycles(1600);
       for (y=0; y<10; y++){
-        __delay_cycles(1600);
         for (z=0; z<10; z++){
-          __delay_cycles(1600);
-          if(clock1_flag == 1){
+          if(button_flag == 1){
+            freeze(z,y,x,w);
+          }
+          if (clock1_flag == 1){
             show(z,y,x,w);      //show the digits on the display if timer1 interrupt fired
             clock1_flag = 0;    //reset clock1 flag
-            enableButInt();
+            //enableButInt();
           }
         }
       }
@@ -242,24 +243,33 @@ void count(){
   } 
 }
 
+// stops the count, displays what the final digits were
+void freeze(int a, int b, int c, int d){
+  show(a, b, c, d);
+
+}
+
 
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
   int i;
+  P1DIR |= 0xFF;
+
   for (i=0;i<1000;i++){
-    P1OUT &= ~(0b01110000);
+    P1OUT = 0b01111000;
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
-    P1OUT &= ~(0b10110000);
+    P1OUT = 0b10111000;
     P2OUT = display[b];
     P2OUT &= ~(display[b]);
-    P1OUT &= ~(0b11010000);
+    P1OUT = 0b11011000;
     P2OUT = display[c];
     P2OUT &= ~(display[c]);
-    P1OUT &= ~(0b11100000);
+    P1OUT = 0b11101000;
     P2OUT = display[d];
     P2OUT &= ~(display[d]);
   }
+  enableButInt();       //reset the values for the button interrupt to work
 }
 /******
  *
@@ -269,13 +279,13 @@ void show(int a, int b, int c, int d){
 #pragma vector=TIMER0_A0_VECTOR             // TA0 CCR0 Interrupt
   __interrupt void Timer0_A0 (void) {
       cio_print("timer 0 fired\n\r");
+      clock0_flag = 1;
   }
 
 //timer interrupt to display digits when timer resets
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
 {       
-    cio_print("timer 1 fired\n\r");
     clock1_flag = 1;
 }
 
@@ -285,11 +295,6 @@ __interrupt void Timer1_A0 (void)
     cio_print("button interrupt fired\r\n");
     button_flag = 1;
 
-    result[0] = z;
-    result[1] = y;
-    result[2] = x;
-    result[3] = w;
-
     while (!(BIT3 & P1IN)) {}
     __delay_cycles(32000);
 
@@ -297,4 +302,3 @@ __interrupt void Timer1_A0 (void)
   }
 
 }               
-
