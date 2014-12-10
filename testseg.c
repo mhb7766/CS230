@@ -25,6 +25,8 @@ void main(void)
   DCOCTL    = CALDCO_1MHZ;
   P2SEL &= ~(BIT6 | BIT7);          // clear XIN, XOUT so they can be used as output
 
+  __enable_interrupt();
+
   P2DIR |= 0xFF;      // Set P2.# to output direction3
   P1DIR |= 0xFF;
   P1OUT &= ~0b11110000;             // Set P1.4-P1.7 to ground
@@ -38,7 +40,7 @@ void main(void)
   serial_init(9600);
   TA1CCTL0 = CCIE;  
 
-  __enable_interrupt();
+  
   //while(1)__delay_cycles(10);
   setup();
   for (;;){

@@ -104,18 +104,32 @@ int shell_process(char *cmd_line)
 int main(void)
 {
 
-   WDTCTL    = WDTPW + WDTHOLD;              // Disable Watchdog
-   BCSCTL1   = CALBC1_1MHZ;                  // Run @ 1MHz
-   DCOCTL    = CALDCO_1MHZ;
-   BCSCTL3   = LFXT1S_2;                     // Source VLO for ACLK
-   P2SEL    &= ~(BIT6 | BIT7);               // P2.6 and P2.7 as Outputs
+  WDTCTL  = WDTPW | WDTHOLD;
+  BCSCTL1 = CALBC1_1MHZ;
+  DCOCTL  = CALDCO_1MHZ;
 
-   setup();
-   count();
+  P1DIR = BIT0;
+  P1REN = BIT3;
+  P1OUT  |= BIT3;
+  P1IE   |= BIT3;
+  P1IES  |= BIT3;
+  P1IFG  &= ~BIT3;  
 
    serial_init(9600);                        // Initialize Serial Coms
    __enable_interrupt();                     // Enable Global Interrupts
 
+  P1REN  = BIT3;    //enable pullup resistor for p1.3
+  P1OUT  = BIT3;    //set output for p1.3 high
+  P1IE  |= BIT3;    //register an interrupt enabler for p1.3
+  P1IES |= BIT3;    //edge select to high.. indicates high to low edge
+  P1IFG &= ~BIT3;   //clear interrupt flag
+
+  TA1CCR0  = 1000; //500;
+  BCSCTL3 = LFXT1S_2; // LFXT1S_2 sets bits 
+                  // in Clock System to 
+                  // 'source'VLO for TASSEL_1
+  TA1CTL = TASSEL_1 | MC_1 | ID_1;
+  TA1CCTL0 = CCIE; 
 /******
   *
   *    PROGRAM LOOP
@@ -169,51 +183,27 @@ int main(void)
   *
   ******/
 
-//initialize the array for showing digits
-void setup(){
-  display[0] = ZERO;
-  display[1] = ONE;
-  display[2] = TWO;
-  display[3] = THREE;
-  display[4] = FOUR;
-  display[5] = FIVE;
-  display[6] = SIX;
-  display[7] = SEVEN;
-  display[8] = EIGHT;
-  display[9] = NINE;
-}
-
-//run the timer
-void count(){
-
-  for (i=0; i<10; i++){
-    for (j=0; j<10; j++){
-      for (k=0; k<10; k++){
-        for (l=0; l<10; l++){
-        }
-      }
-    }
-  } 
-}
-
 
 /******
   *
   *    INTERRUPTS
   *
   ******/
-#pragma vector=TIMER0_A0_VECTOR             // TA0 CCR0 Interrupt
-   __interrupt void Timer0_A0 (void) {
-   // First Timer Interrupt
-}
-
+//timer interrupt to display digits when timer resets
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
-   __interrupt void Timer0_A1 (void) {
-   // Second Timer Interrupt
+__interrupt void Timer1_A0 (void) 
+{       
+    cio_print("timer fired\n\r");
+    cio_printf("%s\n\r", TAIV);
 }
 
-#pragma vector=PORT1_VECTOR
-__interrupt void Port1_Interrupt (void) {
-   // Butter Interrupt
-   P1IFG &= ~BIT3;                           // Don't Forget to Clear Flag!
+#pragma vector =PORT1_VECTOR
+    __interrupt void Port_1(void) {
+
+    cio_print("interrupt fired");
+    cio_printf("%s\n\r", TAIV);
+    P1OUT ^= BIT0;
+    while (!(BIT3 & P1IN)) {}
+    __delay_cycles(32000);
+    P1IFG &= ~BIT3;
 }
