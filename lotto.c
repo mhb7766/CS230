@@ -16,7 +16,7 @@ void count(void);
 void show(int, int, int, int);
 void enableTA1(void);
 void enableButInt(void);
-void freeze(int, int, int, int);
+void freeze();
 /******
  *
  *    CONSTANTS
@@ -230,12 +230,14 @@ void count(){
       for (y=0; y<10; y++){
         for (z=0; z<10; z++){
           if(button_flag == 1){
-            freeze(z,y,x,w);
+            freeze();
           }
-          if (clock1_flag == 1){
-            show(z,y,x,w);      //show the digits on the display if timer1 interrupt fired
-            clock1_flag = 0;    //reset clock1 flag
-            //enableButInt();
+          if(button_flag == 0){
+            if (clock1_flag == 1){
+              show(z,y,x,w);      //show the digits on the display if timer1 interrupt fired
+              clock1_flag = 0;    //reset clock1 flag
+              //enableButInt();
+            }
           }
         }
       }
@@ -244,8 +246,11 @@ void count(){
 }
 
 // stops the count, displays what the final digits were
-void freeze(int a, int b, int c, int d){
-  show(a, b, c, d);
+void freeze(){
+  for(;;){
+    show(a, b, c, d);
+  }
+  
 
 }
 
