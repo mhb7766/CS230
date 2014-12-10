@@ -25,10 +25,10 @@ void enableButInt(void);
 #define ONE     0b00000110;
 #define TWO     0b01011011;
 #define THREE   0b01001111;
-#define FOUR    0b1100110;
-#define FIVE    0b1101101;
-#define SIX     0b1111101;
-#define SEVEN   0b0000111;
+#define FOUR    0b01100110;
+#define FIVE    0b01101101;
+#define SIX     0b01111101;
+#define SEVEN   0b00000111;
 #define EIGHT   0b01111111;
 #define NINE    0b01100111;
 
@@ -247,22 +247,20 @@ void count(){
 //outputs the current timer position to the display
 void show(int a, int b, int c, int d){
   int i;
-  cio_print("in show\r\n");
   for (i=0;i<1000;i++){
-    P1OUT = 0b01111000;
+    P1OUT = 0b01111111;
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
-    P1OUT = 0b10111000;
+    P1OUT = 0b10111111;
     P2OUT = display[b];
     P2OUT &= ~(display[b]);
-    P1OUT = 0b11011000;
+    P1OUT = 0b11011111;
     P2OUT = display[c];
     P2OUT &= ~(display[c]);
-    P1OUT = 0b11101000;
+    P1OUT = 0b11101111;
     P2OUT = display[d];
     P2OUT &= ~(display[d]);
   }
-  cio_print("leaving show\r\n");
 }
 /******
  *
@@ -278,15 +276,16 @@ void show(int a, int b, int c, int d){
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
 {       
-    cio_print("timer 1 fired\n\r");
+  //  cio_print("timer 1 fired\n\r");
     clock1_flag = 1;
 }
 
 #pragma vector =PORT1_VECTOR
     __interrupt void Port_1(void) {
   if(P1IFG & BIT3) {
-    cio_print("button interrupt fired");
+    cio_print("button interrupt fired\r\n");
     button_flag = 1;
+
     result[0] = z;
     result[1] = y;
     result[2] = x;
