@@ -106,6 +106,23 @@ int shell_cmd_argt(shell_cmd_args *args)
 
 int shell_cmd_play(shell_cmd_args *args)
 {
+  int k;
+
+  if(args->count > 4){
+    cio_printf("no more than four guesses... cheater!\n\r");
+    cio_printf("now reset the board!!!!\n\r");
+    for(;;) {}
+  }
+
+  for(k = 0; k < args->count; k++){
+    guess[k] = atoi(args->args[k].val);
+  }
+
+  cio_print((char *)"You guessed:\n\r");
+  for(k = 0; k < args->count; k++) {
+    cio_printf(" - %s\n\r", args->args[k].val);
+  }
+
   enableTA1();
   enableButInt();
 
@@ -247,10 +264,28 @@ void count(){
 
 // stops the count, displays what the final digits were
 void freeze(){
+  int k;
+  int nCorrect = 0;
+
+  cio_printf("The lottery numbers are... %u %u %u %u \r\n", w, x, y, z);
+
+  for(k=0; k<4; k++){
+    cio_printf("%u \r\n", guess[k]);
+  }
+
+  
+  for(k=0; k<4; k++){
+    if(w == guess[0]){nCorrect++; break;}
+    if(x == guess[1]){nCorrect++; break;}
+    if(y == guess[2]){nCorrect++; break;}
+    if(z == guess[3]){nCorrect++; break;}
+  }
+
+  cio_printf("number correct: %u \r\n", nCorrect);
+
   for(;;){
     show();
   }
-  
 
 }
 
@@ -281,12 +316,6 @@ void show(){
  *    INTERRUPTS
  *
  ******/
-#pragma vector=TIMER0_A0_VECTOR             // TA0 CCR0 Interrupt
-  __interrupt void Timer0_A0 (void) {
-      cio_print("timer 0 fired\n\r");
-      clock0_flag = 1;
-  }
-
 //timer interrupt to display digits when timer resets
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
@@ -297,7 +326,7 @@ __interrupt void Timer1_A0 (void)
 #pragma vector =PORT1_VECTOR
     __interrupt void Port_1(void) {
   if(P1IFG & BIT3) {                          //make sure P1.3 did this
-    cio_print("button interrupt fired\r\n");
+   //cio_print("button interrupt fired\r\n");
     button_flag = 1;
 
     while (!(BIT3 & P1IN)) {}
