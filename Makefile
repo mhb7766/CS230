@@ -3,9 +3,9 @@ LIBEMB   = y
 
 ${FILENAME}.elf: ${FILENAME}.c
 ifdef LIBEMB
-	msp430-gcc -mmcu=msp430g2553 -o ${FILENAME}.elf ${FILENAME}.c -lserial -lconio -lshell
+	msp430-gcc -g -mmcu=msp430g2553 -o ${FILENAME}.elf ${FILENAME}.c -lserial -lconio -lshell
 else
-	msp430-gcc -mmcu=msp430g2553 -o ${FILENAME}.elf ${FILENAME}.c
+	msp430-gcc -g -mmcu=msp430g2553 -o ${FILENAME}.elf ${FILENAME}.c
 endif
 
 flash: ${FILENAME}.elf

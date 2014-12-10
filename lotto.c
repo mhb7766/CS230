@@ -105,7 +105,6 @@ int shell_cmd_argt(shell_cmd_args *args)
 int shell_cmd_play(shell_cmd_args *args)
 {
   enableTA1();
-  enableButInt();
 
   for (;;){
     count();
@@ -234,8 +233,8 @@ void count(){
           __delay_cycles(1600);
           if(clock1_flag == 1){
             show(z,y,x,w);      //show the digits on the display if timer1 interrupt fired
-           // cio_print("after show\n\r");
             clock1_flag = 0;    //reset clock1 flag
+            enableButInt();
           }
         }
       }
@@ -248,16 +247,16 @@ void count(){
 void show(int a, int b, int c, int d){
   int i;
   for (i=0;i<1000;i++){
-    P1OUT = 0b01111111;
+    P1OUT &= ~(0b01110000);
     P2OUT = display[a];
     P2OUT &= ~(display[a]);
-    P1OUT = 0b10111111;
+    P1OUT &= ~(0b10110000);
     P2OUT = display[b];
     P2OUT &= ~(display[b]);
-    P1OUT = 0b11011111;
+    P1OUT &= ~(0b11010000);
     P2OUT = display[c];
     P2OUT &= ~(display[c]);
-    P1OUT = 0b11101111;
+    P1OUT &= ~(0b11100000);
     P2OUT = display[d];
     P2OUT &= ~(display[d]);
   }
@@ -276,13 +275,13 @@ void show(int a, int b, int c, int d){
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
 {       
-  //  cio_print("timer 1 fired\n\r");
+    cio_print("timer 1 fired\n\r");
     clock1_flag = 1;
 }
 
 #pragma vector =PORT1_VECTOR
     __interrupt void Port_1(void) {
-  if(P1IFG & BIT3) {
+  if(P1IFG & BIT3) {                          //make sure P1.3 did this
     cio_print("button interrupt fired\r\n");
     button_flag = 1;
 
