@@ -108,22 +108,17 @@ int main(void)
   BCSCTL1 = CALBC1_1MHZ;
   DCOCTL  = CALDCO_1MHZ;
 
-  P1DIR = BIT0;
-  P1REN = BIT3;
-  P1OUT  |= BIT3;
-  P1IE   |= BIT3;
-  P1IES  |= BIT3;
-  P1IFG  &= ~BIT3;  
-
    serial_init(9600);                        // Initialize Serial Coms
    __enable_interrupt();                     // Enable Global Interrupts
 
+  //setup button interrupt
   P1REN  = BIT3;    //enable pullup resistor for p1.3
   P1OUT  = BIT3;    //set output for p1.3 high
   P1IE  |= BIT3;    //register an interrupt enabler for p1.3
   P1IES |= BIT3;    //edge select to high.. indicates high to low edge
   P1IFG &= ~BIT3;   //clear interrupt flag
 
+  //setup timer 1
   TA1CCR0  = 1000; //500;
   BCSCTL3 = LFXT1S_2; // LFXT1S_2 sets bits 
                   // in Clock System to 
@@ -193,17 +188,21 @@ int main(void)
 #pragma vector=TIMER1_A0_VECTOR             // TA1 CCR0 Interrupt
 __interrupt void Timer1_A0 (void) 
 {       
-    cio_print("timer fired\n\r");
+    cio_print("timer 1 fired\n\r");
     cio_printf("%s\n\r", TAIV);
 }
 
 #pragma vector =PORT1_VECTOR
     __interrupt void Port_1(void) {
 
+  if(P1IFG & BIT3) {
     cio_print("interrupt fired");
     cio_printf("%s\n\r", TAIV);
     P1OUT ^= BIT0;
     while (!(BIT3 & P1IN)) {}
     __delay_cycles(32000);
     P1IFG &= ~BIT3;
+  }
+
+
 }

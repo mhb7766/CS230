@@ -1,4 +1,4 @@
-FILENAME = testio
+FILENAME = lotto
 LIBEMB   = y
 
 ${FILENAME}.elf: ${FILENAME}.c
