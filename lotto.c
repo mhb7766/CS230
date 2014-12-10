@@ -105,6 +105,7 @@ int shell_cmd_argt(shell_cmd_args *args)
 int shell_cmd_play(shell_cmd_args *args)
 {
   enableTA1();
+  enableButInt();
 
   for (;;){
     count();
@@ -125,7 +126,6 @@ int shell_process(char *cmd_line)
  ******/
 int main(void)
 {
-
   WDTCTL    = WDTPW + WDTHOLD;              // Disable Watchdog
   BCSCTL1   = CALBC1_1MHZ;                  // Run @ 1MHz
   DCOCTL    = CALDCO_1MHZ;
