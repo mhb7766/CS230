@@ -13,7 +13,7 @@ int shell_cmd_argt(shell_cmd_args *args);
 int shell_cmd_play(shell_cmd_args *args);
 void setup(void);
 void count(void);
-void show(int, int, int, int);
+void show();
 void enableTA1(void);
 void enableButInt(void);
 void freeze();
@@ -234,7 +234,7 @@ void count(){
           }
           if(button_flag == 0){
             if (clock1_flag == 1){
-              show(z,y,x,w);      //show the digits on the display if timer1 interrupt fired
+              show();      //show the digits on the display if timer1 interrupt fired
               clock1_flag = 0;    //reset clock1 flag
               //enableButInt();
             }
@@ -248,7 +248,7 @@ void count(){
 // stops the count, displays what the final digits were
 void freeze(){
   for(;;){
-    show(a, b, c, d);
+    show();
   }
   
 
@@ -256,23 +256,23 @@ void freeze(){
 
 
 //outputs the current timer position to the display
-void show(int a, int b, int c, int d){
+void show(){
   int i;
   P1DIR |= 0xFF;
 
   for (i=0;i<1000;i++){
     P1OUT = 0b01111000;
-    P2OUT = display[a];
-    P2OUT &= ~(display[a]);
+    P2OUT = display[z];
+    P2OUT &= ~(display[z]);
     P1OUT = 0b10111000;
-    P2OUT = display[b];
-    P2OUT &= ~(display[b]);
+    P2OUT = display[y];
+    P2OUT &= ~(display[y]);
     P1OUT = 0b11011000;
-    P2OUT = display[c];
-    P2OUT &= ~(display[c]);
+    P2OUT = display[x];
+    P2OUT &= ~(display[x]);
     P1OUT = 0b11101000;
-    P2OUT = display[d];
-    P2OUT &= ~(display[d]);
+    P2OUT = display[w];
+    P2OUT &= ~(display[w]);
   }
   enableButInt();       //reset the values for the button interrupt to work
 }
