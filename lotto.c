@@ -109,8 +109,7 @@ int shell_cmd_play(shell_cmd_args *args)
   int k;
 
   if(args->count > 4){
-    cio_printf("no more than four guesses... cheater!\n\r");
-    cio_printf("now reset the board!!!!\n\r");
+    cio_printf("error, please reset the board\n\r");
     for(;;) {}
   }
 
@@ -150,6 +149,8 @@ int main(void)
   DCOCTL    = CALDCO_1MHZ;
   BCSCTL3   = LFXT1S_2;                     // Source VLO for ACLK
   P2SEL    &= ~(BIT6 | BIT7);               // P2.6 and P2.7 as Outputs
+  P1OUT     = 0;
+  P2OUT     = 0; // start game with lights off
 
   P2DIR |= 0xFF;                    // Set P2 to output direction
   P1DIR |= 0xFF;                    // Set P1 to output
@@ -273,12 +274,20 @@ void freeze(){
     cio_printf("%u \r\n", guess[k]);
   }
 
-  
+  // loop checks for correct guesses... 
   for(k=0; k<4; k++){
-    if(w == guess[0]){nCorrect++; break;}
-    if(x == guess[1]){nCorrect++; break;}
-    if(y == guess[2]){nCorrect++; break;}
-    if(z == guess[3]){nCorrect++; break;}
+    if(w - guess[k] == 0){
+      cio_printf("match %u\r\n", guess[k]);
+      nCorrect++; }
+    if(x - guess[k] == 0){
+      cio_printf("match %u\r\n", guess[k]);
+      nCorrect++; }
+    if(y - guess[k] == 0){
+      cio_printf("match %u\r\n", guess[k]);
+      nCorrect++; }
+    if(z - guess[k] == 0){
+      cio_printf("match %u\r\n", guess[k]);
+      nCorrect++; }
   }
 
   cio_printf("number correct: %u \r\n", nCorrect);

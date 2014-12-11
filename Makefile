@@ -16,3 +16,6 @@ clean:
 
 erase:
 	mspdebug rf2500 erase
+
+debug: ${FILENAME}.elf
+	( mspdebug rf2500 "gdb" 1>/dev/null & ); msp430-gdb ${FILENAME}.elf -ex "target remote :2000"
