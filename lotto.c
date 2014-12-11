@@ -162,6 +162,11 @@ int main(void)
   serial_init(9600);                        // Initialize Serial Coms
   __enable_interrupt();                     // Enable Global Interrupts
 
+  //small welcome menu
+  cio_print("\r\nWelcome to the lotto game\r\n* To get started type 'play' followed by your four guesses (0-9)\r\n");
+  cio_print("* Like this: $ play 2 8 9 1\r\n");
+  cio_print("* Type help for more info\r\n\r\n");
+
 /******
  *
  *    PROGRAM LOOP
@@ -277,39 +282,57 @@ void freeze(){
   for(k=0; k<4; k++){
     if(w - guess[k] == 0){
       nCorrect++; 
-      cio_printf("nCorrect %u\r\n", nCorrect);}
+      }
     if(x - guess[k] == 0){
       nCorrect++;
-      cio_printf("nCorrect %u\r\n", nCorrect);}
+      }
     if(y - guess[k] == 0){
       nCorrect++; 
-      cio_printf("nCorrect %u\r\n", nCorrect);}
+      }
     if(z - guess[k] == 0){
       nCorrect++; 
       }
   }
 
-  cio_printf("number correct: %u \r\n", nCorrect);
-
-  switch( nCorrect ){
+  //send a message and flash light based on results
+  switch( (unsigned int) nCorrect ){
     case 0 :
-      cio_print("0\r\n");
+      cio_print(">> No matches, you lose... maybe next time\r\n");
       break;
     case 1 :
-      cio_print("1\r\n");
+      cio_print(">> Only 1 match?!?! C'mon!!\r\n");
+      flash_red((unsigned int) nCorrect);
+      break;
     case 2 :
-      cio_print("0\r\n");
+      cio_print(">> 2 matches... meh\r\n");
+      flash_red((unsigned int) nCorrect);
       break;
     case 3 :
-      cio_print("1\r\n");
+      cio_print(">> Good Job, 3 matches\r\n");
+      flash_red((unsigned int) nCorrect);
+      break;
+    case 4 :
+      cio_print(">> Jackpot! You matched 4 numbers\r\n");
+      flash_red((unsigned int) 10);
       break;
     default :
-      cio_print("default\r\n");
-  }
+      cio_print(">> Nice Playing, you matched more than four\r\n");
+  } 
 
 }
 
+void flash_red(unsigned int n){
+  int i;
+  P1DIR |= BIT0;
+  __delay_cycles(384000);
 
+  for(i=0; i<n; i++){
+    P1OUT |= BIT0;
+    __delay_cycles(384000);
+    P1OUT ^= BIT0;
+    __delay_cycles(384000);
+  }
+}
 
 //outputs the current timer position to the display
 void show(){
@@ -353,7 +376,7 @@ __interrupt void Timer1_A0 (void)
     while (!(BIT3 & P1IN)) {}
     __delay_cycles(32000);
 
-    P1IFG &= ~BIT3;
+    P1IFG &= ~BIT3;     //reset bit
   }
 
 }               
