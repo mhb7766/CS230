@@ -11,12 +11,13 @@
 int shell_cmd_help(shell_cmd_args *args);
 int shell_cmd_argt(shell_cmd_args *args);
 int shell_cmd_play(shell_cmd_args *args);
-void setup(void);
-void count(void);
+void setup();
+void count();
 void show();
-void enableTA1(void);
-void enableButInt(void);
+void enableTA1();
+void enableButInt();
 void freeze();
+void showResults();
 /******
  *
  *    CONSTANTS
@@ -117,10 +118,11 @@ int shell_cmd_play(shell_cmd_args *args)
     guess[k] = atoi(args->args[k].val);
   }
 
-  cio_print((char *)"You guessed:\n\r");
+  cio_print((char *)"You guessed:   ");
   for(k = 0; k < args->count; k++) {
-    cio_printf(" - %s\n\r", args->args[k].val);
+    cio_printf("%s ", args->args[k].val);
   }
+  cio_print("\r\n");
 
   enableTA1();
   enableButInt();
@@ -249,6 +251,7 @@ void count(){
         for (z=0; z<10; z++){
           if(button_flag == 1){
             freeze();
+            for(;;){show();}    //display the final lotto numbers
           }
           if(button_flag == 0){
             if (clock1_flag == 1){
@@ -268,35 +271,44 @@ void freeze(){
   int k;
   int nCorrect = 0;
 
-  cio_printf("The lottery numbers are... %u %u %u %u \r\n", w, x, y, z);
-
-  for(k=0; k<4; k++){
-    cio_printf("%u \r\n", guess[k]);
-  }
+  cio_printf("Lotto Numbers: %u %u %u %u \r\n", w, x, y, z);
 
   // loop checks for correct guesses... 
   for(k=0; k<4; k++){
     if(w - guess[k] == 0){
-      cio_printf("match %u\r\n", guess[k]);
-      nCorrect++; }
+      nCorrect++; 
+      cio_printf("nCorrect %u\r\n", nCorrect);}
     if(x - guess[k] == 0){
-      cio_printf("match %u\r\n", guess[k]);
-      nCorrect++; }
+      nCorrect++;
+      cio_printf("nCorrect %u\r\n", nCorrect);}
     if(y - guess[k] == 0){
-      cio_printf("match %u\r\n", guess[k]);
-      nCorrect++; }
+      nCorrect++; 
+      cio_printf("nCorrect %u\r\n", nCorrect);}
     if(z - guess[k] == 0){
-      cio_printf("match %u\r\n", guess[k]);
-      nCorrect++; }
+      nCorrect++; 
+      }
   }
 
   cio_printf("number correct: %u \r\n", nCorrect);
 
-  for(;;){
-    show();
+  switch( nCorrect ){
+    case 0 :
+      cio_print("0\r\n");
+      break;
+    case 1 :
+      cio_print("1\r\n");
+    case 2 :
+      cio_print("0\r\n");
+      break;
+    case 3 :
+      cio_print("1\r\n");
+      break;
+    default :
+      cio_print("default\r\n");
   }
 
 }
+
 
 
 //outputs the current timer position to the display
